@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <script src="https://cdn.jsdelivr.net/npm/phaser@3.15.1/dist/phaser-arcade-physics.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.51.0/dist/phaser-arcade-physics.min.js"></script>
 </head>
 
 <body>
@@ -20,8 +20,12 @@
             }
         };
 
-        var text1;
-        var text2;
+        var mouseInfoText;
+        var mouseDownDurationText;
+        var gameTimeText;
+
+        var gameTime;
+        var mouseDownDuration;
 
         var game = new Phaser.Game(config);
 
@@ -29,41 +33,35 @@
         }
 
         function create() {
-            text1 = this.add.text(10, 10, '', { fill: '#00ff00' });
-            text2 = this.add.text(500, 10, '', { fill: '#00ff00' });
+            mouseInfoText = this.add.text(10, 10, '', { fill: '#00ff00' });
+            text2 = this.add.text(10, 100, '', { fill: '#00ff00' });
+            mouseDownDurationText = this.add.text(10, 150, '', { fill: '#00ff00' });
+            gameTimeText = this.add.text(10, 200, '', { fill: '#00ff00' });
 
             this.input.mouse.disableContextMenu();
 
             this.input.on('pointerup', function (pointer) {
-
                 if (pointer.leftButtonReleased()) {
-                    text2.setText('Left Button was released');
+                    text2.setText('Downtime: ' + pointer.downTime);
+                    mouseDownDurationText.setText('Down duration: ' + (gameTime - pointer.downTime));
                 }
-                else if (pointer.rightButtonReleased()) {
-                    text2.setText('Right Button was released');
-                }
-                else if (pointer.middleButtonReleased()) {
-                    text2.setText('Middle Button was released');
-                }
-                else if (pointer.backButtonReleased()) {
-                    text2.setText('Back Button was released');
-                }
-                else if (pointer.forwardButtonReleased()) {
-                    text2.setText('Forward Button was released');
-                }
-
             });
         }
 
-        function update() {
+        function update(time, delta) {
             var pointer = this.input.activePointer;
 
-            text1.setText([
+            gameTime = time;
+
+            mouseInfoText.setText([
                 'x: ' + pointer.worldX,
                 'y: ' + pointer.worldY,
                 'isDown: ' + pointer.isDown
             ]);
+
+            gameTimeText.setText('gametime: ' + gameTime);
         }
+
     </script>
 </body>
 
