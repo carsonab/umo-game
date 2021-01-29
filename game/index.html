@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <script src="https://cdn.jsdelivr.net/npm/phaser@3.15.1/dist/phaser-arcade-physics.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.51.0/dist/phaser-arcade-physics.min.js"></script>
 </head>
 
 <body>
@@ -20,50 +20,60 @@
             }
         };
 
-        var text1;
-        var text2;
+        var gameTime;
+        var busEndPositionX;
 
         var game = new Phaser.Game(config);
 
         function preload() {
+            this.load.image('bus', 'assets/bus.png');
         }
 
         function create() {
-            text1 = this.add.text(10, 10, '', { fill: '#00ff00' });
-            text2 = this.add.text(500, 10, '', { fill: '#00ff00' });
-
             this.input.mouse.disableContextMenu();
 
+            // Add bus
+            var busImage = this.add.image(100, 300, 'bus');
+            busImage.scaleX = 0.30;
+            busImage.scaleY = 0.30;
+
+            // Tween the move the bus
+            var tween = this.tweens.add({
+                targets: busImage,
+                props: {
+                    x: { value: function () { return busEndPositionX; }, ease: 'Power1' }
+                },
+                duration: 1000,
+                paused: true,
+                onStart: onBusMoving,
+                onStartParams: [busImage]
+            });
+
+            // Do stuff when mouse button is released
             this.input.on('pointerup', function (pointer) {
-
                 if (pointer.leftButtonReleased()) {
-                    text2.setText('Left Button was released');
-                }
-                else if (pointer.rightButtonReleased()) {
-                    text2.setText('Right Button was released');
-                }
-                else if (pointer.middleButtonReleased()) {
-                    text2.setText('Middle Button was released');
-                }
-                else if (pointer.backButtonReleased()) {
-                    text2.setText('Back Button was released');
-                }
-                else if (pointer.forwardButtonReleased()) {
-                    text2.setText('Forward Button was released');
-                }
+                    // Get time button was down
+                    var mouseDownDuration = gameTime - pointer.downTime;
 
+                    // Move the bus
+                    // Will move 300 for every 1 second held down (starting position is 100)
+                    // mouseDownDuration is in ms
+                    busEndPositionX = 100 + mouseDownDuration / 1000 * 300;
+                    tween.play();
+                }
             });
         }
 
-        function update() {
+        function update(time, delta) {
             var pointer = this.input.activePointer;
 
-            text1.setText([
-                'x: ' + pointer.worldX,
-                'y: ' + pointer.worldY,
-                'isDown: ' + pointer.isDown
-            ]);
+            gameTime = time;
         }
+
+        function onBusMoving(tween, targets, gameObject) {
+            // Do nothing
+        }
+
     </script>
 </body>
 
