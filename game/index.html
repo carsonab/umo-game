@@ -20,30 +20,46 @@
             }
         };
 
-        var mouseInfoText;
-        var mouseDownDurationText;
-        var gameTimeText;
-
         var gameTime;
-        var mouseDownDuration;
+        var busEndPositionX;
 
         var game = new Phaser.Game(config);
 
         function preload() {
+            this.load.image('bus', 'assets/bus.png');
         }
 
         function create() {
-            mouseInfoText = this.add.text(10, 10, '', { fill: '#00ff00' });
-            text2 = this.add.text(10, 100, '', { fill: '#00ff00' });
-            mouseDownDurationText = this.add.text(10, 150, '', { fill: '#00ff00' });
-            gameTimeText = this.add.text(10, 200, '', { fill: '#00ff00' });
-
             this.input.mouse.disableContextMenu();
 
+            // Add bus
+            var busImage = this.add.image(100, 300, 'bus');
+            busImage.scaleX = 0.30;
+            busImage.scaleY = 0.30;
+
+            // Tween the move the bus
+            var tween = this.tweens.add({
+                targets: busImage,
+                props: {
+                    x: { value: function () { return busEndPositionX; }, ease: 'Power1' }
+                },
+                duration: 1000,
+                paused: true,
+                onStart: onBusMoving,
+                onStartParams: [busImage]
+            });
+
+            // Do stuff when mouse button is released
             this.input.on('pointerup', function (pointer) {
                 if (pointer.leftButtonReleased()) {
-                    text2.setText('Downtime: ' + pointer.downTime);
-                    mouseDownDurationText.setText('Down duration: ' + (gameTime - pointer.downTime));
+                    // Get time button was down
+                    var mouseDownDuration = gameTime - pointer.downTime;
+
+                    // Move the bus
+                    // Will move 300 for every 1 second held down (starting position is 100)
+                    // mouseDownDuration is in ms
+                    busEndPositionX = 100 + mouseDownDuration / 1000 * 300;
+                    tween.play();
                 }
             });
         }
@@ -52,14 +68,10 @@
             var pointer = this.input.activePointer;
 
             gameTime = time;
+        }
 
-            mouseInfoText.setText([
-                'x: ' + pointer.worldX,
-                'y: ' + pointer.worldY,
-                'isDown: ' + pointer.isDown
-            ]);
-
-            gameTimeText.setText('gametime: ' + gameTime);
+        function onBusMoving(tween, targets, gameObject) {
+            // Do nothing
         }
 
     </script>
