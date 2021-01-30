@@ -20,8 +20,12 @@
             }
         };
 
-        var gameTime;
-        var busEndPositionX;
+        var gameTime; // Current game time
+        var busEndPositionX; // Ending X position of bus after click
+
+        var graphics; // Graphics settings
+        var curve; // The curve that the bus will follow
+        var path;
 
         var game = new Phaser.Game(config);
 
@@ -33,20 +37,54 @@
             this.input.mouse.disableContextMenu();
 
             // Add bus
-            var busImage = this.add.image(100, 300, 'bus');
-            busImage.scaleX = 0.30;
-            busImage.scaleY = 0.30;
+            // var busImage = this.add.image(100, 300, 'bus');
+            // busImage.scaleX = 0.1;
+            // busImage.scaleY = 0.1;
+
+            // Add curve to follow
+            graphics = this.add.graphics();
+
+            path = { t: 0, vec: new Phaser.Math.Vector2() };
+
+            points = [];
+            points.push(new Phaser.Math.Vector2(50, 400));
+            points.push(new Phaser.Math.Vector2(200, 200));
+            points.push(new Phaser.Math.Vector2(350, 300));
+            points.push(new Phaser.Math.Vector2(500, 500));
+            points.push(new Phaser.Math.Vector2(700, 400));
+
+            curve = new Phaser.Curves.Spline(points);
+
 
             // Tween the move the bus
-            var tween = this.tweens.add({
-                targets: busImage,
-                props: {
-                    x: { value: function () { return busEndPositionX; }, ease: 'Power1' }
-                },
-                duration: 1000,
-                paused: true,
-                onStart: onBusMoving,
-                onStartParams: [busImage]
+            // var tween = this.tweens.add({
+            //     targets: busImage,
+            //     props: {
+            //         x: { value: function () { return busEndPositionX; }, ease: 'Power1' }
+            //     },
+            //     duration: 1000,
+            //     paused: true,
+            //     onStart: onBusMoving,
+            //     onStartParams: [busImage]
+            // });
+            // this.tweens.add({
+            //     targets: path,
+            //     t: 1,
+            //     ease: 'Sine.easeInOut',
+            //     duration: 2000,
+            //     yoyo: true,
+            //     repeat: -1
+            // });
+
+            var bus = this.add.follower(curve, 50, 400, 'bus');
+            bus.scaleX = 0.1;
+            bus.scaleY = 0.1;
+
+            bus.startFollow({
+                duration: 6000,
+                yoyo: false,
+                repeat: 0,
+                rotateToPath: true
             });
 
             // Do stuff when mouse button is released
@@ -67,7 +105,19 @@
         function update(time, delta) {
             var pointer = this.input.activePointer;
 
+            // Update the saved game time
             gameTime = time;
+
+            // Clear graphics settings
+            graphics.clear();
+
+            // Draw the curve
+            graphics.lineStyle(1, 0xffffff, 1);
+            curve.draw(graphics, 64);
+
+            // Draw circle along curve
+            curve.getPoint(path.t, path.vec);
+
         }
 
         function onBusMoving(tween, targets, gameObject) {
