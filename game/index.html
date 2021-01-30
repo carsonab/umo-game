@@ -21,22 +21,20 @@
         };
 
         var gameTime; // Current game time
-        var distanceToMove; // Distance to move the bus along the path
         var totalDistancedMovedNormalized; // Total distance the bus has moved along the path (normalized 0 to 1)
+        var lastBusPosition; // Current position of the bus
 
         var graphics; // Graphics settings
-        var points; // The points that define the curve of the route
-        var curve; // The curve that the bus will follow
-        var tweenProgress; // Progress of tween to move bus
-
+        var tweenFollower; // Progress of tween to move bus
+        var path; // Path that the bus will follow (route)
+        var stopDistancesNormalized = []; // Stops along the paths (normalized to path length)
 
         // Debugging/Dev Displays
         var mouseInfoText;
         var mouseDownDuration;
 
-        var busImage;
-        var scene;
-
+        var busImage; // The bus image
+        var scene; // The game scene
 
         var game = new Phaser.Game(config);
 
@@ -55,26 +53,34 @@
             totalDistancedMovedNormalized = 0;
 
             // Init bus
-            busImage = this.add.image(100, 300, 'bus');
+            busImage = this.add.image(50, 400, 'bus');
             busImage.scaleX = 0.10;
             busImage.scaleY = 0.10;
+            lastBusPosition = new Phaser.Math.Vector2(100, 300);
 
-            // Add curve to follow
-            points = [];
-            points.push(new Phaser.Math.Vector2(50, 400));
-            points.push(new Phaser.Math.Vector2(50, 200));
-            points.push(new Phaser.Math.Vector2(200, 200));
-            points.push(new Phaser.Math.Vector2(200, 500));
-            points.push(new Phaser.Math.Vector2(700, 500));
-            points.push(new Phaser.Math.Vector2(700, 300));
-            points.push(new Phaser.Math.Vector2(300, 300));
-            points.push(new Phaser.Math.Vector2(300, 200));
-            points.push(new Phaser.Math.Vector2(500, 200));
-            points.push(new Phaser.Math.Vector2(500, 400));
-            curve = new Phaser.Curves.Spline(points);
+            // Create path
+            path = new Phaser.Curves.Path(50, 400);
+            path.lineTo(50, 200);
+            path.lineTo(200, 200);
+            path.lineTo(200, 500);
+            path.lineTo(700, 500);
+            path.lineTo(700, 300);
+            path.lineTo(300, 300);
+            path.lineTo(300, 200);
+            path.lineTo(500, 200);
+            path.lineTo(500, 400);
 
-            // Track progress along the path from the tween
-            tweenProgress = { t: 0, vec: new Phaser.Math.Vector2() };
+            // Create stops
+            stopDistancesNormalized.push(0.1);
+            stopDistancesNormalized.push(0.3);
+            stopDistancesNormalized.push(0.42);
+            stopDistancesNormalized.push(0.6);
+            stopDistancesNormalized.push(0.85);
+
+
+
+            // Track progress of the bus along the path from the tween
+            tweenFollower = { t: 0, vec: new Phaser.Math.Vector2() };
 
             // Save our scene for use later
             scene = this;
@@ -87,21 +93,22 @@
 
                     // Move the bus
                     // Move more the longer mouse is held down - 300 units of distance per second held
-                    distanceToMove = mouseDownDuration / 1000 * 300;
+                    var distanceToMove = mouseDownDuration / 1000 * 300;
                     // Normalize
-                    normalizedDistToMove = distanceToMove / curve.getLength();
+                    normalizedDistToMove = distanceToMove / path.getLength();
 
                     // Add to total moved
                     totalDistancedMovedNormalized += normalizedDistToMove;
 
                     // Move the bus
                     scene.tweens.add({
-                        targets: tweenProgress,
+                        targets: tweenFollower,
                         t: totalDistancedMovedNormalized,
                         ease: 'Sine.easeInOut',
                         duration: 1200,
                         yoyo: false,
-                        repeat: 0
+                        repeat: 0,
+                        onUpdate: onBusMove
                     });
                 }
             });
@@ -115,25 +122,17 @@
             // Clear graphics settings
             graphics.clear();
 
-            // Draw the curve
+            // Draw the path
             graphics.lineStyle(1, 0xffffff, 1);
-            curve.draw(graphics, 64);
+            path.draw(graphics);
 
             // Draw the stops
             graphics.fillStyle(0x00ff00, 1);
-            for (var i = 0; i < points.length; i++) {
-                graphics.fillCircle(points[i].x, points[i].y, 10);
+            for (var curStop = 0; curStop < stopDistancesNormalized.length; curStop++) {
+                var pointOnPath = new Phaser.Math.Vector2();
+                path.getPoint(stopDistancesNormalized[curStop], pointOnPath);
+                graphics.fillCircle(pointOnPath.x, pointOnPath.y, 10);
             }
-
-            // Update bus position
-            curve.getPointAt(tweenProgress.t, tweenProgress.vec);
-            busImage.setX(tweenProgress.vec.x);
-            busImage.setY(tweenProgress.vec.y);
-
-            // Update bus rotation
-            var tangentUnitVector = new Phaser.Math.Vector2();
-            curve.getTangentAt(tweenProgress.t, tangentUnitVector);
-            busImage.setRotation(tangentUnitVector.angle());
 
             // Update dev test stuff
             var pointer = this.input.activePointer;
@@ -142,9 +141,24 @@
                 'y: ' + pointer.worldY,
                 'isDown: ' + pointer.isDown,
                 'Mouse held for: ' + mouseDownDuration,
-                'DistanceMovedNorm' + totalDistancedMovedNormalized
+                'DistanceMovedNorm: ' + totalDistancedMovedNormalized
             ]);
 
+        }
+
+        function onBusMove(tween, target, param) {
+            // Update bus position
+            path.getPoint(tweenFollower.t, tweenFollower.vec);
+            busImage.setX(tweenFollower.vec.x);
+            busImage.setY(tweenFollower.vec.y);
+
+            // Update bus rotation
+            var movedVector = new Phaser.Math.Vector2();
+            movedVector.x = tweenFollower.vec.x - lastBusPosition.x;
+            movedVector.y = tweenFollower.vec.y - lastBusPosition.y;
+            busImage.setRotation(movedVector.angle());
+            lastBusPosition.x = tweenFollower.vec.x;
+            lastBusPosition.y = tweenFollower.vec.y;
         }
 
     </script>
