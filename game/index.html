@@ -91,7 +91,6 @@
         }
 
         function update(time, delta) {
-            var pointer = this.input.activePointer;
 
             // Update the saved game time
             gameTime = time;
@@ -105,7 +104,13 @@
 
 
             // Update dev test stuff
-            mouseInfoText.setText('Mouse held for: ' + mouseDownDuration);
+            var pointer = this.input.activePointer;
+            mouseInfoText.setText([
+                'x: ' + pointer.worldX,
+                'y: ' + pointer.worldY,
+                'isDown: ' + pointer.isDown,
+                'Mouse held for: ' + mouseDownDuration
+            ]);
 
         }
 
