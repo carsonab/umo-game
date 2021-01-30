@@ -40,7 +40,7 @@
         var levelStatusText;
         var totalPassengersPickedUp = 0; // Total number of passengers picked up
         var movesRemaining = 10; // Total number of remaining moves before losing
-        var numberOfPassengersToWin = 30; // Number of passengers that must be picked up to beat the level
+        var numberOfPassengersToWin = 70; // Number of passengers that must be picked up to beat the level
         var isGameOver = false; // Have the game over conditions been met yet (either win or lose)
 
         // Debugging/Dev Displays
@@ -68,7 +68,7 @@
             levelStatusText = this.add.text(400, 10, '', { fill: '#00ff00' });
 
             // Level complete text - win/lose
-            levelCompleteText = this.add.text(300, 150, '', { fill: '#00ff00' });
+            levelCompleteText = this.add.text(300, 150, '', { fontSize: '35px', fill: '#00ff00' });
 
             // Init total distance moved
             totalDistancedMovedNormalized = 0;
