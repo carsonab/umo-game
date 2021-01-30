@@ -98,15 +98,7 @@
             //     rotateToPath: true
             // });
 
-            bus.startFollow({
-                targets: path,
-                t: 1,
-                ease: 'Sine.easeInOut',
-                duration: 2000,
-                yoyo: true,
-                repeat: -1,
-                rotateToPath: true
-            });
+
 
             // Do stuff when mouse button is released
             this.input.on('pointerup', function (pointer) {
@@ -117,6 +109,19 @@
                     // Move the bus
                     // Move more the longer mouse is held down - 300 units of distance per second held
                     distanceToMove = mouseDownDuration / 1000 * 300;
+                    // Normalize
+                    normalizedDistToMove = distanceToMove / curve.getLength();
+
+                    bus.startFollow({
+                        targets: path,
+                        from: 0,
+                        to: normalizedDistToMove,
+                        ease: 'Sine.easeInOut',
+                        duration: 3000,
+                        yoyo: false,
+                        repeat: 0,
+                        rotateToPath: true
+                    });
                 }
             });
         }
