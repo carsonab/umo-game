@@ -30,7 +30,10 @@
         var graphics; // Graphics settings
         var tweenFollower; // Progress of tween to move bus
         var path; // Path that the bus will follow (route)
+
+        // Stops
         var stopDistancesNormalized = []; // Stops along the paths (normalized to path length)
+        var passengersAtStops = []; // Passengers at each stop
 
         var closestStop = -1;
 
@@ -84,7 +87,11 @@
             stopDistancesNormalized.push(0.6);
             stopDistancesNormalized.push(0.85);
 
-
+            // Add passengers for stops
+            for (var curStop = 0; curStop < stopDistancesNormalized.length; curStop++) {
+                var passengerText = this.add.text(10, 10, '', { fill: '#00ff00' });
+                passengersAtStops.push({ numPassengers: getRandomInt(40), text: passengerText });
+            }
 
             // Track progress of the bus along the path from the tween
             tweenFollower = { t: 0, vec: new Phaser.Math.Vector2() };
@@ -133,12 +140,17 @@
             graphics.lineStyle(1, 0xffffff, 1);
             path.draw(graphics);
 
-            // Draw the stops
+            // Draw the stops and passengers
             graphics.fillStyle(0x00ff00, 1);
             for (var curStop = 0; curStop < stopDistancesNormalized.length; curStop++) {
                 var pointOnPath = new Phaser.Math.Vector2();
                 path.getPoint(stopDistancesNormalized[curStop], pointOnPath);
                 graphics.fillCircle(pointOnPath.x, pointOnPath.y, 10);
+
+                passengersAtStops[curStop].text.setX(pointOnPath.x + 10);
+                passengersAtStops[curStop].text.setY(pointOnPath.y + 10);
+                passengersAtStops[curStop].text.setText(passengersAtStops[curStop].numPassengers);
+
             }
 
             // Check if bus is stopped
@@ -201,6 +213,10 @@
             busImage.setRotation(movedVector.angle());
             lastBusPosition.x = tweenFollower.vec.x;
             lastBusPosition.y = tweenFollower.vec.y;
+        }
+
+        function getRandomInt(max) {
+            return Math.floor(Math.random() * Math.floor(max));
         }
 
     </script>
