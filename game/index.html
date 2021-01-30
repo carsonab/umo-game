@@ -25,8 +25,9 @@
         var totalDistancedMovedNormalized; // Total distance the bus has moved along the path (normalized 0 to 1)
 
         var graphics; // Graphics settings
+        var points; // The points that define the curve of the route
         var curve; // The curve that the bus will follow
-        var path; // Position to be on the path, normalized across the curve
+        var tweenProgress; // Progress of tween to move bus
 
 
         // Debugging/Dev Displays
@@ -45,6 +46,7 @@
 
         function create() {
             this.input.mouse.disableContextMenu();
+            graphics = this.add.graphics();
 
             // Debugging/Dev stuff
             mouseInfoText = this.add.text(10, 10, '', { fill: '#00ff00' });
@@ -58,25 +60,24 @@
             busImage.scaleY = 0.10;
 
             // Add curve to follow
-            graphics = this.add.graphics();
-
-            path = { t: 0, vec: new Phaser.Math.Vector2() };
-
             points = [];
             points.push(new Phaser.Math.Vector2(50, 400));
-            points.push(new Phaser.Math.Vector2(150, 200));
-            points.push(new Phaser.Math.Vector2(200, 300));
-            points.push(new Phaser.Math.Vector2(250, 500));
-            points.push(new Phaser.Math.Vector2(300, 400));
-            points.push(new Phaser.Math.Vector2(400, 400));
+            points.push(new Phaser.Math.Vector2(50, 200));
+            points.push(new Phaser.Math.Vector2(200, 200));
+            points.push(new Phaser.Math.Vector2(200, 500));
+            points.push(new Phaser.Math.Vector2(700, 500));
+            points.push(new Phaser.Math.Vector2(700, 300));
+            points.push(new Phaser.Math.Vector2(300, 300));
+            points.push(new Phaser.Math.Vector2(300, 200));
+            points.push(new Phaser.Math.Vector2(500, 200));
             points.push(new Phaser.Math.Vector2(500, 400));
-            points.push(new Phaser.Math.Vector2(600, 400));
-            points.push(new Phaser.Math.Vector2(700, 400));
-
             curve = new Phaser.Curves.Spline(points);
 
-            scene = this;
+            // Track progress along the path from the tween
+            tweenProgress = { t: 0, vec: new Phaser.Math.Vector2() };
 
+            // Save our scene for use later
+            scene = this;
 
             // Do stuff when mouse button is released
             this.input.on('pointerup', function (pointer) {
@@ -95,7 +96,7 @@
 
                     // Move the bus
                     scene.tweens.add({
-                        targets: path,
+                        targets: tweenProgress,
                         t: totalDistancedMovedNormalized,
                         ease: 'Sine.easeInOut',
                         duration: 1200,
@@ -125,13 +126,13 @@
             }
 
             // Update bus position
-            curve.getPointAt(path.t, path.vec);
-            busImage.setX(path.vec.x);
-            busImage.setY(path.vec.y);
+            curve.getPointAt(tweenProgress.t, tweenProgress.vec);
+            busImage.setX(tweenProgress.vec.x);
+            busImage.setY(tweenProgress.vec.y);
 
             // Update bus rotation
             var tangentUnitVector = new Phaser.Math.Vector2();
-            curve.getTangentAt(path.t, tangentUnitVector);
+            curve.getTangentAt(tweenProgress.t, tangentUnitVector);
             busImage.setRotation(tangentUnitVector.angle());
 
             // Update dev test stuff
