@@ -40,6 +40,8 @@
         var levelStatusText;
         var totalPassengersPickedUp = 0; // Total number of passengers picked up
         var movesRemaining = 10; // Total number of remaining moves before losing
+        var numberOfPassengersToWin = 30; // Number of passengers that must be picked up to beat the level
+        var isGameOver = false; // Have the game over conditions been met yet (either win or lose)
 
         // Debugging/Dev Displays
         var mouseInfoText;
@@ -64,6 +66,9 @@
 
             // Game status text
             levelStatusText = this.add.text(400, 10, '', { fill: '#00ff00' });
+
+            // Level complete text - win/lose
+            levelCompleteText = this.add.text(300, 150, '', { fill: '#00ff00' });
 
             // Init total distance moved
             totalDistancedMovedNormalized = 0;
@@ -95,10 +100,17 @@
             stopDistancesNormalized.push(0.85);
 
             // Add passengers for stops
-            for (var curStop = 0; curStop < stopDistancesNormalized.length; curStop++) {
-                var passengerText = this.add.text(10, 10, '', { fill: '#00ff00' });
-                passengersAtStops.push({ numPassengers: getRandomInt(40), text: passengerText });
-            }
+            // Random number at each stop
+            // for (var curStop = 0; curStop < stopDistancesNormalized.length; curStop++) {
+            //     var passengerText = this.add.text(10, 10, '', { fill: '#00ff00' });
+            //     passengersAtStops.push({ numPassengers: getRandomInt(40), text: passengerText });
+            // }
+            // Manually set numbers
+            passengersAtStops.push({ numPassengers: 10, text: this.add.text(10, 10, '', { fill: '#00ff00' }) });
+            passengersAtStops.push({ numPassengers: 40, text: this.add.text(10, 10, '', { fill: '#00ff00' }) });
+            passengersAtStops.push({ numPassengers: 15, text: this.add.text(10, 10, '', { fill: '#00ff00' }) });
+            passengersAtStops.push({ numPassengers: 30, text: this.add.text(10, 10, '', { fill: '#00ff00' }) });
+            passengersAtStops.push({ numPassengers: 20, text: this.add.text(10, 10, '', { fill: '#00ff00' }) });
 
             // Track progress of the bus along the path from the tween
             tweenFollower = { t: 0, vec: new Phaser.Math.Vector2() };
@@ -109,7 +121,7 @@
             // Do stuff when mouse button is released
             this.input.on('pointerup', function (pointer) {
                 if (pointer.leftButtonReleased()) {
-                    if (movesRemaining > 0) {
+                    if (!isGameOver) {
                         // Get time button was down (in ms)
                         mouseDownDuration = gameTime - pointer.downTime;
 
@@ -202,10 +214,21 @@
             }
             lastBusWasStopped = isBusStopped;
 
+            // Check for win
+            if (totalPassengersPickedUp >= numberOfPassengersToWin) {
+                levelCompleteText.setText('You Win!');
+                isGameOver = true;
+            } else if (movesRemaining == 0 && totalPassengersPickedUp < numberOfPassengersToWin) {
+                levelCompleteText.setText('You Lose!');
+                isGameOver = true;
+            }
+
             // Update level status info
             levelStatusText.setText([
                 'totalPassengersPickedUp: ' + totalPassengersPickedUp,
-                'movesRemaining: ' + movesRemaining
+                'movesRemaining: ' + movesRemaining,
+                'totalPassengersNeededToWin: ' + numberOfPassengersToWin,
+                'passengersRemaining: ' + (numberOfPassengersToWin - totalPassengersPickedUp)
             ]);
 
             // Update dev test stuff
