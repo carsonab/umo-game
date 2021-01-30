@@ -46,11 +46,6 @@
             mouseInfoText = this.add.text(10, 10, '', { fill: '#00ff00' });
 
 
-            // Add bus
-            // var busImage = this.add.image(100, 300, 'bus');
-            // busImage.scaleX = 0.1;
-            // busImage.scaleY = 0.1;
-
             // Add curve to follow
             graphics = this.add.graphics();
 
@@ -65,40 +60,9 @@
 
             curve = new Phaser.Curves.Spline(points);
 
-
-            // Tween the move the bus
-            // var tween = this.tweens.add({
-            //     targets: busImage,
-            //     props: {
-            //         x: { value: function () { return busEndPositionX; }, ease: 'Power1' }
-            //     },
-            //     duration: 1000,
-            //     paused: true,
-            //     onStart: onBusMoving,
-            //     onStartParams: [busImage]
-            // });
-
-            // this.tweens.add({
-            //     targets: path,
-            //     t: 1,
-            //     ease: 'Sine.easeInOut',
-            //     duration: 2000,
-            //     yoyo: true,
-            //     repeat: -1
-            // });
-
             var bus = this.add.follower(curve, 50, 400, 'bus');
             bus.scaleX = 0.1;
             bus.scaleY = 0.1;
-
-            // bus.startFollow({
-            //     duration: 6000,
-            //     yoyo: false,
-            //     repeat: 0,
-            //     rotateToPath: true
-            // });
-
-
 
             // Do stuff when mouse button is released
             this.input.on('pointerup', function (pointer) {
