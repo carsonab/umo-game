@@ -23,6 +23,8 @@
         var gameTime; // Current game time
         var totalDistancedMovedNormalized; // Total distance the bus has moved along the path (normalized 0 to 1)
         var lastBusPosition; // Current position of the bus
+        var lastBusPositionNorm; // Normalized last bus position along path
+        var isBusStopped = false;
 
         var graphics; // Graphics settings
         var tweenFollower; // Progress of tween to move bus
@@ -51,6 +53,7 @@
 
             // Init total distance moved
             totalDistancedMovedNormalized = 0;
+            lastBusPositionNorm = 0;
 
             // Init bus
             busImage = this.add.image(50, 400, 'bus');
@@ -101,7 +104,7 @@
                     totalDistancedMovedNormalized += normalizedDistToMove;
 
                     // Move the bus
-                    scene.tweens.add({
+                    var tween = scene.tweens.add({
                         targets: tweenFollower,
                         t: totalDistancedMovedNormalized,
                         ease: 'Sine.easeInOut',
@@ -134,6 +137,14 @@
                 graphics.fillCircle(pointOnPath.x, pointOnPath.y, 10);
             }
 
+            // Check if bus is stopped
+            if (lastBusPositionNorm == tweenFollower.t) {
+                isBusStopped = true;
+            } else {
+                isBusStopped = false;
+            }
+            lastBusPositionNorm = tweenFollower.t;
+
             // Update dev test stuff
             var pointer = this.input.activePointer;
             mouseInfoText.setText([
@@ -141,7 +152,8 @@
                 'y: ' + pointer.worldY,
                 'isDown: ' + pointer.isDown,
                 'Mouse held for: ' + mouseDownDuration,
-                'DistanceMovedNorm: ' + totalDistancedMovedNormalized
+                'DistanceMovedNorm: ' + totalDistancedMovedNormalized,
+                'isBusStopped: ' + isBusStopped
             ]);
 
         }
