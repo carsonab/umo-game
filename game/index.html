@@ -36,7 +36,10 @@
         var passengersAtStops = []; // Passengers at each stop
         var closestStop = -1;
 
+        // Game state stuff
+        var levelStatusText;
         var totalPassengersPickedUp = 0; // Total number of passengers picked up
+        var movesRemaining = 10; // Total number of remaining moves before losing
 
         // Debugging/Dev Displays
         var mouseInfoText;
@@ -58,6 +61,9 @@
 
             // Debugging/Dev stuff
             mouseInfoText = this.add.text(10, 10, '', { fill: '#00ff00' });
+
+            // Game status text
+            levelStatusText = this.add.text(400, 10, '', { fill: '#00ff00' });
 
             // Init total distance moved
             totalDistancedMovedNormalized = 0;
@@ -103,33 +109,40 @@
             // Do stuff when mouse button is released
             this.input.on('pointerup', function (pointer) {
                 if (pointer.leftButtonReleased()) {
-                    // Get time button was down (in ms)
-                    mouseDownDuration = gameTime - pointer.downTime;
+                    if (movesRemaining > 0) {
+                        // Get time button was down (in ms)
+                        mouseDownDuration = gameTime - pointer.downTime;
 
-                    // Move the bus
-                    // Move more the longer mouse is held down - 300 units of distance per second held
-                    var distanceToMove = mouseDownDuration / 1000 * 300;
-                    // Normalize
-                    normalizedDistToMove = distanceToMove / path.getLength();
+                        // Move the bus
+                        // Move more the longer mouse is held down - 300 units of distance per second held
+                        var distanceToMove = mouseDownDuration / 1000 * 300;
+                        // Normalize
+                        normalizedDistToMove = distanceToMove / path.getLength();
 
-                    // Add to total moved
-                    totalDistancedMovedNormalized += normalizedDistToMove;
+                        // Add to total moved
+                        totalDistancedMovedNormalized += normalizedDistToMove;
 
-                    // Move the bus
-                    var tween = scene.tweens.add({
-                        targets: tweenFollower,
-                        t: totalDistancedMovedNormalized,
-                        ease: 'Sine.easeInOut',
-                        duration: 1200,
-                        yoyo: false,
-                        repeat: 0,
-                        onUpdate: onBusMove
-                    });
+                        // Move the bus
+                        var tween = scene.tweens.add({
+                            targets: tweenFollower,
+                            t: totalDistancedMovedNormalized,
+                            ease: 'Sine.easeInOut',
+                            duration: 1200,
+                            yoyo: false,
+                            repeat: 0,
+                            onUpdate: onBusMove
+                        });
+
+                        // Decrease number of moves remaining
+                        movesRemaining--;
+                    }
                 }
             });
         }
 
         function update(time, delta) {
+
+            var pointer = this.input.activePointer;
 
             // Update the saved game time
             gameTime = time;
@@ -189,8 +202,13 @@
             }
             lastBusWasStopped = isBusStopped;
 
+            // Update level status info
+            levelStatusText.setText([
+                'totalPassengersPickedUp: ' + totalPassengersPickedUp,
+                'movesRemaining: ' + movesRemaining
+            ]);
+
             // Update dev test stuff
-            var pointer = this.input.activePointer;
             mouseInfoText.setText([
                 'x: ' + pointer.worldX,
                 'y: ' + pointer.worldY,
@@ -199,8 +217,7 @@
                 'DistanceMovedNorm: ' + totalDistancedMovedNormalized,
                 'isBusStopped: ' + isBusStopped,
                 'closestStop: ' + closestStop,
-                'isAtStop: ' + isAtStop,
-                'totalPassengersPickedUp: ' + totalPassengersPickedUp
+                'isAtStop: ' + isAtStop
             ]);
 
         }
