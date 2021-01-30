@@ -34,8 +34,9 @@
         // Stops
         var stopDistancesNormalized = []; // Stops along the paths (normalized to path length)
         var passengersAtStops = []; // Passengers at each stop
-
         var closestStop = -1;
+
+        var totalPassengersPickedUp = 0; // Total number of passengers picked up
 
         // Debugging/Dev Displays
         var mouseInfoText;
@@ -143,14 +144,14 @@
             // Draw the stops and passengers
             graphics.fillStyle(0x00ff00, 1);
             for (var curStop = 0; curStop < stopDistancesNormalized.length; curStop++) {
+                // Stops
                 var pointOnPath = new Phaser.Math.Vector2();
                 path.getPoint(stopDistancesNormalized[curStop], pointOnPath);
                 graphics.fillCircle(pointOnPath.x, pointOnPath.y, 10);
-
-                passengersAtStops[curStop].text.setX(pointOnPath.x + 10);
-                passengersAtStops[curStop].text.setY(pointOnPath.y + 10);
+                // Passengers
+                passengersAtStops[curStop].text.setX(pointOnPath.x + 10); // Offset a little from the path
+                passengersAtStops[curStop].text.setY(pointOnPath.y + 10); // Offset a little from the path
                 passengersAtStops[curStop].text.setText(passengersAtStops[curStop].numPassengers);
-
             }
 
             // Check if bus is stopped
@@ -178,6 +179,9 @@
                 var lengthToStop = closestDistNorm * path.getLength();
                 if (lengthToStop < 30) {
                     isAtStop = true;
+                    // Pick up the passengers
+                    totalPassengersPickedUp += passengersAtStops[closestStop].numPassengers;
+                    passengersAtStops[closestStop].numPassengers = 0;
                 } else {
                     isAtStop = false;
                 }
@@ -195,7 +199,8 @@
                 'DistanceMovedNorm: ' + totalDistancedMovedNormalized,
                 'isBusStopped: ' + isBusStopped,
                 'closestStop: ' + closestStop,
-                'isAtStop: ' + isAtStop
+                'isAtStop: ' + isAtStop,
+                'totalPassengersPickedUp: ' + totalPassengersPickedUp
             ]);
 
         }
