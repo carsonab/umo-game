@@ -24,16 +24,20 @@
         var totalDistancedMovedNormalized; // Total distance the bus has moved along the path (normalized 0 to 1)
         var lastBusPosition; // Current position of the bus
         var lastBusPositionNorm; // Normalized last bus position along path
-        var isBusStopped = false;
+        var isBusStopped = true;
+        var lastBusWasStopped = true;
 
         var graphics; // Graphics settings
         var tweenFollower; // Progress of tween to move bus
         var path; // Path that the bus will follow (route)
         var stopDistancesNormalized = []; // Stops along the paths (normalized to path length)
 
+        var closestStop = -1;
+
         // Debugging/Dev Displays
         var mouseInfoText;
         var mouseDownDuration;
+        var isAtStop = false;
 
         var busImage; // The bus image
         var scene; // The game scene
@@ -145,6 +149,30 @@
             }
             lastBusPositionNorm = tweenFollower.t;
 
+            // Check if just stopped so that we can pick up passengers
+            var closestDistNorm = 1.0;
+            if (isBusStopped && !lastBusWasStopped) {
+                // Find closest stop on route
+                currentProgressNormalized = tweenFollower.t;
+                for (var stop = 0; stop < stopDistancesNormalized.length; stop++) {
+                    var distanceToStop = Math.abs(stopDistancesNormalized[stop] - currentProgressNormalized);
+                    if (distanceToStop < closestDistNorm) {
+                        closestDistNorm = distanceToStop;
+                        closestStop = stop;
+                    }
+                }
+
+                // Check if stop is close enough to pick up passengers
+                var lengthToStop = closestDistNorm * path.getLength();
+                if (lengthToStop < 30) {
+                    isAtStop = true;
+                } else {
+                    isAtStop = false;
+                }
+
+            }
+            lastBusWasStopped = isBusStopped;
+
             // Update dev test stuff
             var pointer = this.input.activePointer;
             mouseInfoText.setText([
@@ -153,7 +181,9 @@
                 'isDown: ' + pointer.isDown,
                 'Mouse held for: ' + mouseDownDuration,
                 'DistanceMovedNorm: ' + totalDistancedMovedNormalized,
-                'isBusStopped: ' + isBusStopped
+                'isBusStopped: ' + isBusStopped,
+                'closestStop: ' + closestStop,
+                'isAtStop: ' + isAtStop
             ]);
 
         }
