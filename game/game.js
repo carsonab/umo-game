@@ -53,6 +53,11 @@ var busImage; // The bus image
 var gameScene = new Phaser.Scene("gameScene");
 var titleScene = new Phaser.Scene("titleScene");
 
+// Depths
+var mapDepth = -3;
+var pathDepth = -2;
+var stopDepth = -1;
+
 var game = new Phaser.Game(config);
 
 // Add both scenes (it does not start them)
@@ -150,7 +155,7 @@ gameScene.create = function () {
 
     // Background map
     var backgroundMap = this.add.image(-600, -300, 'map').setOrigin(0, 0);
-    backgroundMap.setDepth(-2);
+    backgroundMap.setDepth(mapDepth);
     this.cameras.main.setSize(800, 600);
 
     rect = this.add.rectangle(10, 10, 550, 300, 0x3a3a3a, 0.7);
@@ -280,7 +285,8 @@ gameScene.update = function (time, delta) {
     graphics.clear();
 
     // Draw the path
-    graphics.lineStyle(1, 0xffffff, 1);
+    graphics.lineStyle(3, 0x111111, 1);
+    graphics.setDepth(pathDepth);
     path.draw(graphics);
 
     // Draw the stops and passengers
@@ -292,7 +298,7 @@ gameScene.update = function (time, delta) {
         //graphics.fillCircle(pointOnPath.x, pointOnPath.y, 10);
 
         var stop = this.add.image(pointOnPath.x, pointOnPath.y, 'bus-stop');
-        stop.setDepth(-1);
+        stop.setDepth(stopDepth);
         stop.scaleX = 0.08;
         stop.scaleY = 0.08;
 
