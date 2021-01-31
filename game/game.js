@@ -38,6 +38,7 @@ var buyMovesButton; // Buy additional moves with stars
 
 // Go Indicator
 var throttleBar; // Bar that increase to indicate how far you will go
+var throttleBarStartingY = 515; // Default location of throttle bar
 var isGoClicked = false; // Is the go button currently clicked
 var maxGoDuration = 3000; // Max time you can hold go before it stops increasing
 
@@ -64,6 +65,9 @@ game.scene.start("titleScene");
 gameScene.preload = function () {
     // Bus image
     this.load.image('bus', 'assets/bus.png');
+    this.load.image('map', 'assets/bg3.png');
+    this.load.image('bus-stop', 'assets/bus-stop.png');
+    this.load.image('gas-pedal', 'assets/gas-pedal.png');
 
     // -----------------------------------
     // Progress Bar
@@ -144,32 +148,77 @@ gameScene.create = function () {
     this.input.mouse.disableContextMenu();
     graphics = this.add.graphics();
 
+    // Background map
+    this.add.image(-600, -300, 'map').setOrigin(0, 0);
+    this.cameras.main.setSize(800, 600);
+
+    rect = this.add.rectangle(10, 10, 550, 300, 0x3a3a3a, 0.7);
+    rect.fixedToCamera = true;
+    rect.setScrollFactor(0, 0);
+
+    // Go button/throttle background
+    goBackground = this.add.rectangle(760, 390, 55, 380, 0x06D9AB);
+    goBackground.fixedToCamera = true;
+    goBackground.setScrollFactor(0, 0);
+    goBackground.setStrokeStyle(4, 0x111111);
+
     // Debugging/Dev stuff
     mouseInfoText = this.add.text(10, 10, '', { fill: '#00ff00' });
+    mouseInfoText.fixedToCamera = true;
+    mouseInfoText.setScrollFactor(0, 0);
 
     // Game status text
     levelStatusText = this.add.text(400, 10, '', { fill: '#00ff00' });
+    levelStatusText.fixedToCamera = true;
+    levelStatusText.setScrollFactor(0, 0);
 
     // Level complete text - win/lose
     levelCompleteText = this.add.text(300, 150, '', { fontSize: '35px', fill: '#00ff00' });
+    levelCompleteText.fixedToCamera = true;
+    levelCompleteText.setScrollFactor(0, 0);
+
+    // Go Button background
+    goBackground = this.add.rectangle(760, 550, 40, 40, 0x333333);
+    goBackground.fixedToCamera = true;
+    goBackground.setScrollFactor(0, 0);
+    goBackground.setStrokeStyle(2, 0x111111);
 
     // Go button - moves the bus
-    goButton = this.add.text(10, 250, 'Go!', { fontSize: '20px', fill: '#00ff00' });
+    goButton = this.add.image(760, 550, 'gas-pedal');
+    goButton.scaleX = 0.07;
+    goButton.scaleY = 0.07;
     goButton.setInteractive();
+    goButton.fixedToCamera = true;
+    goButton.setScrollFactor(0, 0);
+
     goButton.on('pointerdown', function (pointer) { onGoButtonDown(pointer) });
     goButton.on('pointerup', function (pointer) { onGoButtonUp(pointer) });
     goButton.on('pointerout', function (pointer) { onGoButtonOut(pointer) });
 
-    // Go Indicator
-    throttleBar = this.add.rectangle(770, 400, 10, 0, 0xff6699);
+    // Go Indicator/Throttle
+    throttleBar = this.add.rectangle(760, throttleBarStartingY, 10, 0, 0xff6699);
+    throttleBar.fixedToCamera = true;
+    throttleBar.setScrollFactor(0, 0);
+    throttleBar.setStrokeStyle(2, 0x111111);
+
+
+
+    // Text background
+    rect = this.add.rectangle(10, 580, 650, 100, 0x3a3a3a, 0.7);
+    rect.fixedToCamera = true;
+    rect.setScrollFactor(0, 0);
 
     // Buy moves button
     buyMovesButton = this.add.text(10, 580, 'Buy a move for 150 Stars!', { fontSize: '20px', fill: '#00ff00' });
     buyMovesButton.setInteractive();
     buyMovesButton.on('pointerup', buyMove);
+    buyMovesButton.fixedToCamera = true;
+    buyMovesButton.setScrollFactor(0, 0);
 
     // Text for stars
     starsText = this.add.text(10, 560, '', { fontSize: '20px', fill: '#00ff00' });
+    starsText.fixedToCamera = true;
+    starsText.setScrollFactor(0, 0);
 
     // Init total distance moved
     totalDistancedMovedNormalized = 0;
@@ -180,6 +229,8 @@ gameScene.create = function () {
     busImage.scaleX = 0.10;
     busImage.scaleY = 0.10;
     lastBusPosition = new Phaser.Math.Vector2(100, 300);
+
+    this.cameras.main.startFollow(busImage, true, 0.08, 0.08);
 
     // Create path
     path = new Phaser.Curves.Path(50, 400);
@@ -238,6 +289,11 @@ gameScene.update = function (time, delta) {
         var pointOnPath = new Phaser.Math.Vector2();
         path.getPoint(stopDistancesNormalized[curStop], pointOnPath);
         graphics.fillCircle(pointOnPath.x, pointOnPath.y, 10);
+
+        var stop = this.add.image(pointOnPath.x, pointOnPath.y, 'bus-stop');
+        stop.scaleX = 0.08;
+        stop.scaleY = 0.08;
+
         // Passengers
         passengersAtStops[curStop].text.setX(pointOnPath.x + 10); // Offset a little from the path
         passengersAtStops[curStop].text.setY(pointOnPath.y + 10); // Offset a little from the path
@@ -282,7 +338,6 @@ gameScene.update = function (time, delta) {
     // Update go button indicator
     // Make throttle indicator taller the longer the button is held
     // Height grows down, so have to adjust location as well
-    var startingY = 400;
     if (isGoClicked) {
         var duration = (gameTime - pointer.downTime);
         // Max duration 3 sec
@@ -290,10 +345,11 @@ gameScene.update = function (time, delta) {
             duration = maxGoDuration;
         }
         var height = duration / 1000.0 * 100.0;
-        throttleBar.setSize(10, height);
-        throttleBar.setY(startingY - height);
+        throttleBar.setSize(15, height);
+        throttleBar.setY(throttleBarStartingY - height);
     } else {
-        throttleBar.setSize(10, 0);
+        throttleBar.setSize(15, 0);
+        throttleBar.setY(throttleBarStartingY);
     }
 
     // Check for win
