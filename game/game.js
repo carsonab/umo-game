@@ -157,7 +157,7 @@ gameScene.create = function () {
     graphics = this.add.graphics();
 
     // Background map
-    var backgroundMap = this.add.image(-600, -300, 'map').setOrigin(0, 0);
+    var backgroundMap = this.add.image(0, 0, 'map').setOrigin(0, 0);
     backgroundMap.setDepth(mapDepth);
     this.cameras.main.setSize(800, 600);
 
@@ -244,7 +244,7 @@ gameScene.create = function () {
     lastBusPositionNorm = 0;
 
     // Init bus
-    busImage = this.add.image(50, 400, 'bus');
+    busImage = this.add.image(388, 355, 'bus');
     busImage.scaleX = 0.10;
     busImage.scaleY = 0.10;
     lastBusPosition = new Phaser.Math.Vector2(100, 300);
@@ -252,16 +252,26 @@ gameScene.create = function () {
     this.cameras.main.startFollow(busImage, true, 0.08, 0.08);
 
     // Create path
-    path = new Phaser.Curves.Path(50, 400);
-    path.lineTo(50, 200);
-    path.lineTo(200, 200);
-    path.lineTo(200, 500);
-    path.lineTo(700, 500);
-    path.lineTo(700, 300);
-    path.lineTo(300, 300);
-    path.lineTo(300, 200);
-    path.lineTo(500, 200);
-    path.lineTo(500, 400);
+    path = new Phaser.Curves.Path(388, 355);
+    path.lineTo(660, 355);
+    path.lineTo(660, 550);
+    path.lineTo(858, 550);
+    path.lineTo(858, 430);
+    path.lineTo(595, 430);
+    path.lineTo(595, 548);
+    path.lineTo(504, 548);
+    path.lineTo(504, 666);
+    path.lineTo(660, 666);
+    path.lineTo(660, 836);
+    path.lineTo(986, 836);
+    path.lineTo(986, 741);
+    path.lineTo(1166, 741);
+    path.lineTo(1166, 549);
+    path.lineTo(1224, 549);
+    path.lineTo(1224, 666);
+    path.lineTo(859, 666);
+    path.lineTo(859, 912);
+    path.lineTo(1315, 912);
 
     // Create stops
     stopDistancesNormalized.push(0.1);
