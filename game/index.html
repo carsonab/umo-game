@@ -43,6 +43,9 @@
         var numberOfPassengersToWin = 70; // Number of passengers that must be picked up to beat the level
         var isGameOver = false; // Have the game over conditions been met yet (either win or lose)
 
+        // Controls
+        var goButton; // Makes the bus go
+
         // Debugging/Dev Displays
         var mouseInfoText;
         var mouseDownDuration;
@@ -54,8 +57,11 @@
         var game = new Phaser.Game(config);
 
         function preload() {
+            // Bus image
             this.load.image('bus', 'assets/bus.png');
 
+            // -----------------------------------
+            // Progress Bar
             var progressBar = this.add.graphics();
             var progressBox = this.add.graphics();
             progressBox.fillStyle(0x222222, 0.8);
@@ -115,7 +121,9 @@
                 percentText.destroy();
                 assetText.destroy();
             });
+            // -----------------------------------
 
+            // Logo image
             this.load.image('logo', 'assets/Cubic_CTS_UMO.png');
             for (var i = 0; i < 500; i++) {
                 this.load.image('Awesome Gaming Experiences : ' + i, 'assets/Cubic_CTS_UMO.png');
@@ -137,6 +145,41 @@
 
             // Level complete text - win/lose
             levelCompleteText = this.add.text(300, 150, '', { fontSize: '35px', fill: '#00ff00' });
+
+            // Go button - moves the bus
+            goButton = this.add.text(10, 250, 'Go!', { fontSize: '20px', fill: '#00ff00' });
+            goButton.setInteractive();
+            goButton.on('pointerup', function (pointer) {
+                if (pointer.leftButtonReleased()) {
+                    if (!isGameOver) {
+                        // Get time button was down (in ms)
+                        mouseDownDuration = gameTime - pointer.downTime;
+
+                        // Move the bus
+                        // Move more the longer mouse is held down - 300 units of distance per second held
+                        var distanceToMove = mouseDownDuration / 1000 * 300;
+                        // Normalize
+                        normalizedDistToMove = distanceToMove / path.getLength();
+
+                        // Add to total moved
+                        totalDistancedMovedNormalized += normalizedDistToMove;
+
+                        // Move the bus
+                        var tween = scene.tweens.add({
+                            targets: tweenFollower,
+                            t: totalDistancedMovedNormalized,
+                            ease: 'Sine.easeInOut',
+                            duration: 1200,
+                            yoyo: false,
+                            repeat: 0,
+                            onUpdate: onBusMove
+                        });
+
+                        // Decrease number of moves remaining
+                        movesRemaining--;
+                    }
+                }
+            });
 
             // Init total distance moved
             totalDistancedMovedNormalized = 0;
@@ -185,39 +228,6 @@
 
             // Save our scene for use later
             scene = this;
-
-            // Do stuff when mouse button is released
-            this.input.on('pointerup', function (pointer) {
-                if (pointer.leftButtonReleased()) {
-                    if (!isGameOver) {
-                        // Get time button was down (in ms)
-                        mouseDownDuration = gameTime - pointer.downTime;
-
-                        // Move the bus
-                        // Move more the longer mouse is held down - 300 units of distance per second held
-                        var distanceToMove = mouseDownDuration / 1000 * 300;
-                        // Normalize
-                        normalizedDistToMove = distanceToMove / path.getLength();
-
-                        // Add to total moved
-                        totalDistancedMovedNormalized += normalizedDistToMove;
-
-                        // Move the bus
-                        var tween = scene.tweens.add({
-                            targets: tweenFollower,
-                            t: totalDistancedMovedNormalized,
-                            ease: 'Sine.easeInOut',
-                            duration: 1200,
-                            yoyo: false,
-                            repeat: 0,
-                            onUpdate: onBusMove
-                        });
-
-                        // Decrease number of moves remaining
-                        movesRemaining--;
-                    }
-                }
-            });
         }
 
         function update(time, delta) {
@@ -310,6 +320,10 @@
                 'closestStop: ' + closestStop,
                 'isAtStop: ' + isAtStop
             ]);
+
+        }
+
+        function onGoButtonClicked(pointer) {
 
         }
 
