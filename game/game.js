@@ -41,7 +41,7 @@ var buyMovesButton; // Buy additional moves with stars
 var throttleBar; // Bar that increase to indicate how far you will go
 var throttleBarStartingY = 515; // Default location of throttle bar
 var isGoClicked = false; // Is the go button currently clicked
-var maxGoDuration = 3000; // Max time you can hold go before it stops increasing
+var maxGoDuration = 1200; // Max time you can hold go before it stops increasing
 
 // Debugging/Dev Displays
 var mouseInfoText;
@@ -278,7 +278,10 @@ gameScene.create = function () {
     stopDistancesNormalized.push(0.3);
     stopDistancesNormalized.push(0.42);
     stopDistancesNormalized.push(0.6);
-    stopDistancesNormalized.push(0.85);
+    stopDistancesNormalized.push(0.75);
+    stopDistancesNormalized.push(0.84);
+    stopDistancesNormalized.push(0.92);
+    stopDistancesNormalized.push(1.0);
 
     // Add passengers for stops
     // Random number at each stop
@@ -292,6 +295,9 @@ gameScene.create = function () {
     passengersAtStops.push({ numPassengers: 15, text: this.add.text(10, 10, '', { fill: '#000000' }) });
     passengersAtStops.push({ numPassengers: 30, text: this.add.text(10, 10, '', { fill: '#000000' }) });
     passengersAtStops.push({ numPassengers: 20, text: this.add.text(10, 10, '', { fill: '#000000' }) });
+    passengersAtStops.push({ numPassengers: 20, text: this.add.text(10, 10, '', { fill: '#000000' }) });
+    passengersAtStops.push({ numPassengers: 10, text: this.add.text(10, 10, '', { fill: '#000000' }) });
+    passengersAtStops.push({ numPassengers: 40, text: this.add.text(10, 10, '', { fill: '#000000' }) });
 
     // Track progress of the bus along the path from the tween
     tweenFollower = { t: 0, vec: new Phaser.Math.Vector2() };
@@ -375,7 +381,7 @@ gameScene.update = function (time, delta) {
         if (duration > maxGoDuration) {
             duration = maxGoDuration;
         }
-        var height = duration / 1000.0 * 100.0;
+        var height = duration / 1000.0 * 250.0;
         throttleBar.setSize(15, height);
         throttleBar.setY(throttleBarStartingY - height);
     } else {
@@ -455,8 +461,8 @@ function onGoButtonUp(pointer) {
             }
 
             // Move the bus
-            // Move more the longer mouse is held down - 300 units of distance per second held
-            var distanceToMove = mouseDownDuration / 1000 * 300;
+            // Move more the longer mouse is held down - 500 units of distance per second held
+            var distanceToMove = mouseDownDuration / 1000 * 700;
             // Normalize
             normalizedDistToMove = distanceToMove / path.getLength();
 
