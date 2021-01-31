@@ -36,6 +36,11 @@ var starsText;
 var goButton; // Makes the bus go
 var buyMovesButton; // Buy additional moves with stars
 
+// Go Indicator
+var throttleBar; // Bar that increase to indicate how far you will go
+var isGoClicked = false; // Is the go button currently clicked
+var maxGoDuration = 3000; // Max time you can hold go before it stops increasing
+
 // Debugging/Dev Displays
 var mouseInfoText;
 var mouseDownDuration;
@@ -56,7 +61,7 @@ game.scene.add("gameScene", gameScene);
 // Start the title scene
 game.scene.start("titleScene");
 
-gameScene.preload = function() {
+gameScene.preload = function () {
     // Bus image
     this.load.image('bus', 'assets/bus.png');
 
@@ -124,17 +129,17 @@ gameScene.preload = function() {
     // -----------------------------------
 
     // Logo image
-    this.load.image('logo', 'assets/Cubic_CTS_UMO.png');
-    for (var i = 0; i < 500; i++) {
-        this.load.image('Awesome Gaming Experiences : ' + i, 'assets/Cubic_CTS_UMO.png');
-    }
+    // this.load.image('logo', 'assets/Cubic_CTS_UMO.png');
+    // for (var i = 0; i < 500; i++) {
+    //     this.load.image('Awesome Gaming Experiences : ' + i, 'assets/Cubic_CTS_UMO.png');
+    // }
 
     gameScene = this;
 }
 
-gameScene.create = function() {
+gameScene.create = function () {
 
-    var logo = this.add.image(650, 150, 'logo');
+    //var logo = this.add.image(650, 150, 'logo');
 
     this.input.mouse.disableContextMenu();
     graphics = this.add.graphics();
@@ -151,42 +156,12 @@ gameScene.create = function() {
     // Go button - moves the bus
     goButton = this.add.text(10, 250, 'Go!', { fontSize: '20px', fill: '#00ff00' });
     goButton.setInteractive();
+    goButton.on('pointerdown', function (pointer) { onGoButtonDown(pointer) });
+    goButton.on('pointerup', function (pointer) { onGoButtonUp(pointer) });
+    goButton.on('pointerout', function (pointer) { onGoButtonOut(pointer) });
 
-
-    goButton.on('pointerup', function (pointer) {
-        if (pointer.leftButtonReleased()) {
-            if(movesRemaining<=0 && numberOfStars > 150) {
-                confirmToMove()
-            } else if (!isGameOver) {
-                // Get time button was down (in ms)
-                mouseDownDuration = gameTime - pointer.downTime;
-
-                // Move the bus
-                // Move more the longer mouse is held down - 300 units of distance per second held
-                var distanceToMove = mouseDownDuration / 1000 * 300;
-                // Normalize
-                normalizedDistToMove = distanceToMove / path.getLength();
-
-                // Add to total moved
-                totalDistancedMovedNormalized += normalizedDistToMove;
-                // Move the bus
-                var tween = gameScene.tweens.add({
-                    targets: tweenFollower,
-                    t: totalDistancedMovedNormalized,
-                    ease: 'Sine.easeInOut',
-                    duration: 1200,
-                    yoyo: false,
-                    repeat: 0,
-                    onUpdate: onBusMove
-                });
-
-                // Decrease number of moves remaining
-                movesRemaining--;
-            } else {
-                isGameOver=true;
-            }
-        }
-    });
+    // Go Indicator
+    throttleBar = this.add.rectangle(770, 400, 10, 0, 0xff6699);
 
     // Buy moves button
     buyMovesButton = this.add.text(10, 580, 'Buy a move for 150 Stars!', { fontSize: '20px', fill: '#00ff00' });
@@ -239,10 +214,10 @@ gameScene.create = function() {
     passengersAtStops.push({ numPassengers: 20, text: this.add.text(10, 10, '', { fill: '#00ff00' }) });
 
     // Track progress of the bus along the path from the tween
-    tweenFollower = { t: 0, vec: new Phaser.Math.Vector2() };    
+    tweenFollower = { t: 0, vec: new Phaser.Math.Vector2() };
 }
 
-gameScene.update = function(time, delta) {
+gameScene.update = function (time, delta) {
 
     var pointer = this.input.activePointer;
 
@@ -304,6 +279,23 @@ gameScene.update = function(time, delta) {
     }
     lastBusWasStopped = isBusStopped;
 
+    // Update go button indicator
+    // Make throttle indicator taller the longer the button is held
+    // Height grows down, so have to adjust location as well
+    var startingY = 400;
+    if (isGoClicked) {
+        var duration = (gameTime - pointer.downTime);
+        // Max duration 3 sec
+        if (duration > maxGoDuration) {
+            duration = maxGoDuration;
+        }
+        var height = duration / 1000.0 * 100.0;
+        throttleBar.setSize(10, height);
+        throttleBar.setY(startingY - height);
+    } else {
+        throttleBar.setSize(10, 0);
+    }
+
     // Check for win
     if (totalPassengersPickedUp >= numberOfPassengersToWin) {
         levelCompleteText.setText('You Win!');
@@ -322,43 +314,89 @@ gameScene.update = function(time, delta) {
     ]);
 
     // Update dev test stuff
-    mouseInfoText.setText([
-        'x: ' + pointer.worldX,
-        'y: ' + pointer.worldY,
-        'isDown: ' + pointer.isDown,
-        'Mouse held for: ' + mouseDownDuration,
-        'DistanceMovedNorm: ' + totalDistancedMovedNormalized,
-        'isBusStopped: ' + isBusStopped,
-        'closestStop: ' + closestStop,
-        'isAtStop: ' + isAtStop
-    ]);
+    // mouseInfoText.setText([
+    //     'x: ' + pointer.worldX,
+    //     'y: ' + pointer.worldY,
+    //     'isDown: ' + pointer.isDown,
+    //     'Mouse held for: ' + mouseDownDuration,
+    //     'DistanceMovedNorm: ' + totalDistancedMovedNormalized,
+    //     'isBusStopped: ' + isBusStopped,
+    //     'closestStop: ' + closestStop,
+    //     'isAtStop: ' + isAtStop
+    // ]);
 
     starsText.setText('Star Balance: ' + numberOfStars);
 
 }
 
-titleScene.preload = function() {
+titleScene.preload = function () {
     this.load.image('background', 'assets/Cubic_CTS_UMO.png');
 };
 
-titleScene.create = function()
-{
-    var bg = this.add.sprite(300,200,'background');
-    bg.setOrigin(0,0);
+titleScene.create = function () {
+    var bg = this.add.sprite(300, 200, 'background');
+    bg.setOrigin(0, 0);
     bg.setInteractive({ useHandCursor: true });
     bg.on('pointerdown', () => {
-        this.scene.switch('gameScene');}
+        this.scene.switch('gameScene');
+    }
     );
 
-    var text = this.add.text(250,400, 'Welcome to Bus Stop Hub Game!');
+    var text = this.add.text(250, 400, 'Welcome to Bus Stop Hub Game!');
     text.setInteractive({ useHandCursor: true });
     text.on('pointerdown', () => {
-        this.scene.switch('gameScene');}
+        this.scene.switch('gameScene');
+    }
     );
 };
 
-function onGoButtonClicked(pointer) {
+function onGoButtonDown(pointer) {
+    isGoClicked = true;
+}
 
+function onGoButtonUp(pointer) {
+    if (pointer.leftButtonReleased()) {
+        if (movesRemaining <= 0 && numberOfStars > 150) {
+            confirmToMove()
+        } else if (!isGameOver) {
+            // Get time button was down (in ms)
+            mouseDownDuration = gameTime - pointer.downTime;
+            if (mouseDownDuration > maxGoDuration) {
+                mouseDownDuration = maxGoDuration;
+            }
+
+            // Move the bus
+            // Move more the longer mouse is held down - 300 units of distance per second held
+            var distanceToMove = mouseDownDuration / 1000 * 300;
+            // Normalize
+            normalizedDistToMove = distanceToMove / path.getLength();
+
+            // Add to total moved
+            totalDistancedMovedNormalized += normalizedDistToMove;
+            // Move the bus
+            var tween = gameScene.tweens.add({
+                targets: tweenFollower,
+                t: totalDistancedMovedNormalized,
+                ease: 'Sine.easeInOut',
+                duration: 1200,
+                yoyo: false,
+                repeat: 0,
+                onUpdate: onBusMove
+            });
+
+            // Decrease number of moves remaining
+            movesRemaining--;
+        } else {
+            isGameOver = true;
+        }
+    }
+
+    // Clear flag that button is clicked
+    isGoClicked = false;
+}
+
+function onGoButtonOut(pointer) {
+    isGoClicked = false;
 }
 
 function onBusMove(tween, target, param) {
@@ -383,7 +421,7 @@ function getRandomInt(max) {
 function confirmToMove() {
     if (!confirmResult) {
         confirmResult = confirm("Please Buy Moves to continue!");
-        if(!confirmResult) {
+        if (!confirmResult) {
             levelCompleteText.setText('You Lose!');
             //showing Game Over.
             isGameOver = true;
@@ -393,13 +431,13 @@ function confirmToMove() {
 
 }
 
-function buyMove (pointer) {
+function buyMove(pointer) {
     if (pointer.leftButtonReleased()) {
         // Buy move with stars
         if (numberOfStars >= 150) {
             numberOfStars -= 150;
             movesRemaining += 1;
-            isGameOver=false;
+            isGameOver = false;
             levelCompleteText.setText('');
         } else {
             alert("Exausted all points!! Come back later!")
