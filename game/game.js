@@ -464,7 +464,7 @@ function onGoButtonUp(pointer) {
 
             // Move the bus
             // Move more the longer mouse is held down - 500 units of distance per second held
-            var distanceToMove = mouseDownDuration / 1000 * 700;
+            var distanceToMove = mouseDownDuration / 1000 * 450;
             // Normalize
             normalizedDistToMove = distanceToMove / path.getLength();
 
