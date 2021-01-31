@@ -59,6 +59,9 @@ game.scene.start("titleScene");
 gameScene.preload = function() {
     // Bus image
     this.load.image('bus', 'assets/bus.png');
+    this.load.image('map', 'assets/bg3.png');
+    this.load.image('bus-stop', 'assets/bus-stop.png');
+    this.load.image('up-arrow', 'assets/up-arrow.png');
 
     // -----------------------------------
     // Progress Bar
@@ -139,19 +142,36 @@ gameScene.create = function() {
     this.input.mouse.disableContextMenu();
     graphics = this.add.graphics();
 
+    this.add.image(-600, -300, 'map').setOrigin(0, 0);
+    this.cameras.main.setSize(800, 600);
+
+    rect = this.add.rectangle(10, 10, 550, 300, 0x3a3a3a, 0.7);
+    rect.fixedToCamera = true;
+    rect.setScrollFactor(0,0);
+
     // Debugging/Dev stuff
     mouseInfoText = this.add.text(10, 10, '', { fill: '#00ff00' });
+    mouseInfoText.fixedToCamera = true;
+    mouseInfoText.setScrollFactor(0,0);
 
     // Game status text
     levelStatusText = this.add.text(400, 10, '', { fill: '#00ff00' });
+    levelStatusText.fixedToCamera = true;
+    levelStatusText.setScrollFactor(0,0);
 
     // Level complete text - win/lose
     levelCompleteText = this.add.text(300, 150, '', { fontSize: '35px', fill: '#00ff00' });
+    levelCompleteText.fixedToCamera = true;
+    levelCompleteText.setScrollFactor(0,0);
 
     // Go button - moves the bus
-    goButton = this.add.text(10, 250, 'Go!', { fontSize: '20px', fill: '#00ff00' });
+    //goButton = this.add.text(10, 250, 'Go!', { fontSize: '36px', fill: '#00ff00' });
+    goButton = this.add.image(720, 550, 'up-arrow');
+    goButton.scaleX = 0.3;
+    goButton.scaleY = 0.3;
     goButton.setInteractive();
-
+    goButton.fixedToCamera = true;
+    goButton.setScrollFactor(0,0);
 
     goButton.on('pointerup', function (pointer) {
         if (pointer.leftButtonReleased()) {
@@ -188,13 +208,21 @@ gameScene.create = function() {
         }
     });
 
+    rect = this.add.rectangle(10, 580, 650, 100, 0x3a3a3a, 0.7);
+    rect.fixedToCamera = true;
+    rect.setScrollFactor(0,0);
+
     // Buy moves button
     buyMovesButton = this.add.text(10, 580, 'Buy a move for 150 Stars!', { fontSize: '20px', fill: '#00ff00' });
     buyMovesButton.setInteractive();
     buyMovesButton.on('pointerup', buyMove);
+    buyMovesButton.fixedToCamera = true;
+    buyMovesButton.setScrollFactor(0,0);
 
     // Text for stars
     starsText = this.add.text(10, 560, '', { fontSize: '20px', fill: '#00ff00' });
+    starsText.fixedToCamera = true;
+    starsText.setScrollFactor(0,0);
 
     // Init total distance moved
     totalDistancedMovedNormalized = 0;
@@ -205,6 +233,8 @@ gameScene.create = function() {
     busImage.scaleX = 0.10;
     busImage.scaleY = 0.10;
     lastBusPosition = new Phaser.Math.Vector2(100, 300);
+
+    this.cameras.main.startFollow(busImage, true, 0.08, 0.08);
 
     // Create path
     path = new Phaser.Curves.Path(50, 400);
@@ -263,6 +293,11 @@ gameScene.update = function(time, delta) {
         var pointOnPath = new Phaser.Math.Vector2();
         path.getPoint(stopDistancesNormalized[curStop], pointOnPath);
         graphics.fillCircle(pointOnPath.x, pointOnPath.y, 10);
+
+        var stop = this.add.image(pointOnPath.x, pointOnPath.y, 'bus-stop');
+        stop.scaleX = 0.15;
+        stop.scaleY = 0.15;
+
         // Passengers
         passengersAtStops[curStop].text.setX(pointOnPath.x + 10); // Offset a little from the path
         passengersAtStops[curStop].text.setY(pointOnPath.y + 10); // Offset a little from the path
