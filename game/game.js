@@ -149,7 +149,8 @@ gameScene.create = function () {
     graphics = this.add.graphics();
 
     // Background map
-    this.add.image(-600, -300, 'map').setOrigin(0, 0);
+    var backgroundMap = this.add.image(-600, -300, 'map').setOrigin(0, 0);
+    backgroundMap.setDepth(-2);
     this.cameras.main.setSize(800, 600);
 
     rect = this.add.rectangle(10, 10, 550, 300, 0x3a3a3a, 0.7);
@@ -288,9 +289,10 @@ gameScene.update = function (time, delta) {
         // Stops
         var pointOnPath = new Phaser.Math.Vector2();
         path.getPoint(stopDistancesNormalized[curStop], pointOnPath);
-        graphics.fillCircle(pointOnPath.x, pointOnPath.y, 10);
+        //graphics.fillCircle(pointOnPath.x, pointOnPath.y, 10);
 
         var stop = this.add.image(pointOnPath.x, pointOnPath.y, 'bus-stop');
+        stop.setDepth(-1);
         stop.scaleX = 0.08;
         stop.scaleY = 0.08;
 
