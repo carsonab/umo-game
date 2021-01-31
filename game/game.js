@@ -281,7 +281,6 @@ gameScene.create = function () {
     stopDistancesNormalized.push(0.75);
     stopDistancesNormalized.push(0.84);
     stopDistancesNormalized.push(0.92);
-    stopDistancesNormalized.push(1.0);
 
     // Add passengers for stops
     // Random number at each stop
@@ -296,7 +295,6 @@ gameScene.create = function () {
     passengersAtStops.push({ numPassengers: 30, text: this.add.text(10, 10, '', { fill: '#000000' }) });
     passengersAtStops.push({ numPassengers: 20, text: this.add.text(10, 10, '', { fill: '#000000' }) });
     passengersAtStops.push({ numPassengers: 20, text: this.add.text(10, 10, '', { fill: '#000000' }) });
-    passengersAtStops.push({ numPassengers: 10, text: this.add.text(10, 10, '', { fill: '#000000' }) });
     passengersAtStops.push({ numPassengers: 40, text: this.add.text(10, 10, '', { fill: '#000000' }) });
 
     // Track progress of the bus along the path from the tween
@@ -335,6 +333,7 @@ gameScene.update = function (time, delta) {
         passengersAtStops[curStop].text.setX(pointOnPath.x + 10); // Offset a little from the path
         passengersAtStops[curStop].text.setY(pointOnPath.y + 10); // Offset a little from the path
         passengersAtStops[curStop].text.setText(passengersAtStops[curStop].numPassengers);
+        passengersAtStops[curStop].text.setDepth(stopDepth);
     }
 
     // Check if bus is stopped
@@ -389,11 +388,14 @@ gameScene.update = function (time, delta) {
         throttleBar.setY(throttleBarStartingY);
     }
 
-    // Check for win
+    // Check for win/lose
     if (totalPassengersPickedUp >= numberOfPassengersToWin) {
         levelCompleteText.setText('You Win!');
         isGameOver = true;
     } else if (movesRemaining == 0 && totalPassengersPickedUp < numberOfPassengersToWin) {
+        levelCompleteText.setText('You Lose!');
+        isGameOver = true;
+    } else if (tweenFollower.t > 0.99) {
         levelCompleteText.setText('You Lose!');
         isGameOver = true;
     }
