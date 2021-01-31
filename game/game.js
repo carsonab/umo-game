@@ -22,7 +22,8 @@ var passengersAtStops = []; // Passengers at each stop
 var closestStop = -1;
 
 // Game state stuff
-var levelStatusText;
+var levelStatusTextLeft;
+var levelStatusTextRight;
 var totalPassengersPickedUp = 0; // Total number of passengers picked up
 var movesRemaining = 10; // Total number of remaining moves before losing
 var numberOfPassengersToWin = 70; // Number of passengers that must be picked up to beat the level
@@ -57,6 +58,8 @@ var titleScene = new Phaser.Scene("titleScene");
 var mapDepth = -3;
 var pathDepth = -2;
 var stopDepth = -1;
+var gameStatusBgDepth = 1;
+var gameStatusTextDepth = 2;
 
 var game = new Phaser.Game(config);
 
@@ -158,10 +161,6 @@ gameScene.create = function () {
     backgroundMap.setDepth(mapDepth);
     this.cameras.main.setSize(800, 600);
 
-    rect = this.add.rectangle(10, 10, 550, 300, 0x3a3a3a, 0.7);
-    rect.fixedToCamera = true;
-    rect.setScrollFactor(0, 0);
-
     // Go button/throttle background
     goBackground = this.add.rectangle(760, 390, 55, 380, 0x06D9AB);
     goBackground.fixedToCamera = true;
@@ -173,10 +172,22 @@ gameScene.create = function () {
     mouseInfoText.fixedToCamera = true;
     mouseInfoText.setScrollFactor(0, 0);
 
+    // Game status background
+    gameStatusBg = this.add.rectangle(400, 0, 800, 120, 0x222222, 0.7);
+    gameStatusBg.fixedToCamera = true;
+    gameStatusBg.setStrokeStyle(4, 0x111111);
+    gameStatusBg.setScrollFactor(0, 0);
+    gameStatusBg.setDepth(gameStatusBgDepth);
+
     // Game status text
-    levelStatusText = this.add.text(400, 10, '', { fill: '#00ff00' });
-    levelStatusText.fixedToCamera = true;
-    levelStatusText.setScrollFactor(0, 0);
+    levelStatusTextLeft = this.add.text(10, 10, '', { fontSize: '20px', fill: '#FFFFFF' });
+    levelStatusTextLeft.fixedToCamera = true;
+    levelStatusTextLeft.setScrollFactor(0, 0);
+    levelStatusTextLeft.setDepth(gameStatusTextDepth);
+    levelStatusTextRight = this.add.text(400, 10, '', { fontSize: '20px', fill: '#FFFFFF' });
+    levelStatusTextRight.fixedToCamera = true;
+    levelStatusTextRight.setScrollFactor(0, 0);
+    levelStatusTextRight.setDepth(gameStatusTextDepth);
 
     // Level complete text - win/lose
     levelCompleteText = this.add.text(300, 150, '', { fontSize: '35px', fill: '#00ff00' });
@@ -202,29 +213,31 @@ gameScene.create = function () {
     goButton.on('pointerout', function (pointer) { onGoButtonOut(pointer) });
 
     // Go Indicator/Throttle
-    throttleBar = this.add.rectangle(760, throttleBarStartingY, 10, 0, 0xff6699);
+    throttleBar = this.add.rectangle(758, throttleBarStartingY, 10, 0, 0xff6699);
     throttleBar.fixedToCamera = true;
     throttleBar.setScrollFactor(0, 0);
     throttleBar.setStrokeStyle(2, 0x111111);
 
-
-
-    // Text background
-    rect = this.add.rectangle(10, 580, 650, 100, 0x3a3a3a, 0.7);
-    rect.fixedToCamera = true;
-    rect.setScrollFactor(0, 0);
+    // Stars text background
+    var starsTextBg = this.add.rectangle(10, 590, 650, 100, 0x222222, 0.7);
+    starsTextBg.fixedToCamera = true;
+    starsTextBg.setScrollFactor(0, 0);
+    starsTextBg.setDepth(gameStatusBgDepth);
+    starsTextBg.setStrokeStyle(4, 0x111111);
 
     // Buy moves button
-    buyMovesButton = this.add.text(10, 580, 'Buy a move for 150 Stars!', { fontSize: '20px', fill: '#00ff00' });
+    buyMovesButton = this.add.text(10, 570, 'Buy a move for 150 Stars!', { fontSize: '20px', fill: '#FFFFFF' });
     buyMovesButton.setInteractive();
     buyMovesButton.on('pointerup', buyMove);
     buyMovesButton.fixedToCamera = true;
     buyMovesButton.setScrollFactor(0, 0);
+    buyMovesButton.setDepth(gameStatusTextDepth);
 
     // Text for stars
-    starsText = this.add.text(10, 560, '', { fontSize: '20px', fill: '#00ff00' });
+    starsText = this.add.text(10, 550, '', { fontSize: '20px', fill: '#FFFFFF' });
     starsText.fixedToCamera = true;
     starsText.setScrollFactor(0, 0);
+    starsText.setDepth(gameStatusTextDepth);
 
     // Init total distance moved
     totalDistancedMovedNormalized = 0;
@@ -264,11 +277,11 @@ gameScene.create = function () {
     //     passengersAtStops.push({ numPassengers: getRandomInt(40), text: passengerText });
     // }
     // Manually set numbers
-    passengersAtStops.push({ numPassengers: 10, text: this.add.text(10, 10, '', { fill: '#00ff00' }) });
-    passengersAtStops.push({ numPassengers: 40, text: this.add.text(10, 10, '', { fill: '#00ff00' }) });
-    passengersAtStops.push({ numPassengers: 15, text: this.add.text(10, 10, '', { fill: '#00ff00' }) });
-    passengersAtStops.push({ numPassengers: 30, text: this.add.text(10, 10, '', { fill: '#00ff00' }) });
-    passengersAtStops.push({ numPassengers: 20, text: this.add.text(10, 10, '', { fill: '#00ff00' }) });
+    passengersAtStops.push({ numPassengers: 10, text: this.add.text(10, 10, '', { fill: '#000000' }) });
+    passengersAtStops.push({ numPassengers: 40, text: this.add.text(10, 10, '', { fill: '#000000' }) });
+    passengersAtStops.push({ numPassengers: 15, text: this.add.text(10, 10, '', { fill: '#000000' }) });
+    passengersAtStops.push({ numPassengers: 30, text: this.add.text(10, 10, '', { fill: '#000000' }) });
+    passengersAtStops.push({ numPassengers: 20, text: this.add.text(10, 10, '', { fill: '#000000' }) });
 
     // Track progress of the bus along the path from the tween
     tweenFollower = { t: 0, vec: new Phaser.Math.Vector2() };
@@ -370,11 +383,13 @@ gameScene.update = function (time, delta) {
     }
 
     // Update level status info
-    levelStatusText.setText([
-        'totalPassengersPickedUp: ' + totalPassengersPickedUp,
-        'movesRemaining: ' + movesRemaining,
-        'totalPassengersNeededToWin: ' + numberOfPassengersToWin,
-        'passengersRemaining: ' + (numberOfPassengersToWin - totalPassengersPickedUp)
+    levelStatusTextLeft.setText([
+        'Passengers Picked Up: ' + totalPassengersPickedUp,
+        'Passengers To Win: ' + numberOfPassengersToWin
+    ]);
+    levelStatusTextRight.setText([
+        'Moves Remaining: ' + movesRemaining
+        //'Passengers Remaining: ' + (numberOfPassengersToWin - totalPassengersPickedUp)
     ]);
 
     // Update dev test stuff
