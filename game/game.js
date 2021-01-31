@@ -190,7 +190,7 @@ gameScene.create = function () {
     levelStatusTextRight.setDepth(gameStatusTextDepth);
 
     // Level complete text - win/lose
-    levelCompleteText = this.add.text(300, 150, '', { fontSize: '35px', fill: '#00ff00' });
+    levelCompleteText = this.add.text(300, 150, '', { fontSize: '45px', fill: '#000000', stroke: '#AAAAAA', strokeThickness: 5 });
     levelCompleteText.fixedToCamera = true;
     levelCompleteText.setScrollFactor(0, 0);
 
