@@ -25,8 +25,8 @@ var closestStop = -1;
 var levelStatusTextLeft;
 var levelStatusTextRight;
 var totalPassengersPickedUp = 0; // Total number of passengers picked up
-var movesRemaining = 10; // Total number of remaining moves before losing
-var numberOfPassengersToWin = 70; // Number of passengers that must be picked up to beat the level
+var movesRemaining = 14; // Total number of remaining moves before losing
+var numberOfPassengersToWin = 100; // Number of passengers that must be picked up to beat the level
 var isGameOver = false; // Have the game over conditions been met yet (either win or lose)
 
 // Number of stars in users account
@@ -275,8 +275,11 @@ gameScene.create = function () {
 
     // Create stops
     stopDistancesNormalized.push(0.1);
+    stopDistancesNormalized.push(0.2);
     stopDistancesNormalized.push(0.3);
+    stopDistancesNormalized.push(0.35);
     stopDistancesNormalized.push(0.42);
+    stopDistancesNormalized.push(0.5);
     stopDistancesNormalized.push(0.6);
     stopDistancesNormalized.push(0.75);
     stopDistancesNormalized.push(0.84);
@@ -290,8 +293,11 @@ gameScene.create = function () {
     // }
     // Manually set numbers
     passengersAtStops.push({ numPassengers: 10, text: this.add.text(10, 10, '', { fill: '#000000' }) });
-    passengersAtStops.push({ numPassengers: 40, text: this.add.text(10, 10, '', { fill: '#000000' }) });
     passengersAtStops.push({ numPassengers: 15, text: this.add.text(10, 10, '', { fill: '#000000' }) });
+    passengersAtStops.push({ numPassengers: 40, text: this.add.text(10, 10, '', { fill: '#000000' }) });
+    passengersAtStops.push({ numPassengers: 10, text: this.add.text(10, 10, '', { fill: '#000000' }) });
+    passengersAtStops.push({ numPassengers: 15, text: this.add.text(10, 10, '', { fill: '#000000' }) });
+    passengersAtStops.push({ numPassengers: 10, text: this.add.text(10, 10, '', { fill: '#000000' }) });
     passengersAtStops.push({ numPassengers: 30, text: this.add.text(10, 10, '', { fill: '#000000' }) });
     passengersAtStops.push({ numPassengers: 20, text: this.add.text(10, 10, '', { fill: '#000000' }) });
     passengersAtStops.push({ numPassengers: 20, text: this.add.text(10, 10, '', { fill: '#000000' }) });
