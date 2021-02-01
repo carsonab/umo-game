@@ -368,6 +368,18 @@ gameScene.update = function (time, delta) {
             isAtStop = false;
         }
 
+        // Check for win/lose
+        if (totalPassengersPickedUp >= numberOfPassengersToWin) {
+            levelCompleteText.setText('You Win!');
+            isGameOver = true;
+        } else if (movesRemaining == 0 && totalPassengersPickedUp < numberOfPassengersToWin) {
+            levelCompleteText.setText('You Lose!');
+            isGameOver = true;
+        } else if (tweenFollower.t > 0.99) {
+            levelCompleteText.setText('You Lose!');
+            isGameOver = true;
+        }
+
     }
     lastBusWasStopped = isBusStopped;
 
@@ -388,17 +400,7 @@ gameScene.update = function (time, delta) {
         throttleBar.setY(throttleBarStartingY);
     }
 
-    // Check for win/lose
-    if (totalPassengersPickedUp >= numberOfPassengersToWin) {
-        levelCompleteText.setText('You Win!');
-        isGameOver = true;
-    } else if (movesRemaining == 0 && totalPassengersPickedUp < numberOfPassengersToWin) {
-        levelCompleteText.setText('You Lose!');
-        isGameOver = true;
-    } else if (tweenFollower.t > 0.99) {
-        levelCompleteText.setText('You Lose!');
-        isGameOver = true;
-    }
+
 
     // Update level status info
     levelStatusTextLeft.setText([
